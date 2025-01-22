@@ -1,0 +1,40 @@
+[
+  {
+    "id": "2",
+    "titulo": "Producto B",
+    "precio": 200
+  },
+  {
+    "id": "3",
+    "titulo": "Producto C",
+    "precio": 300
+  },
+  {
+    "id": "4",
+    "titulo": "Producto D",
+    "precio": 400
+  },
+  {
+    "id": "5",
+    "titulo": "Producto E",
+    "precio": 500
+  },
+  {
+    "id": "6",
+    "title": "Teclado Razer BlackWidow V3",
+    "price": "119.99",
+    "stock": "6"
+  },
+  {
+    "id": "7",
+    "title": "Teclado Razer BlackWidow V3",
+    "price": "119.99",
+    "stock": "6"
+  },
+  {
+    "id": "8",
+    "title": "Teclado Razer BlackWidow V3",
+    "price": "119.99",
+    "stock": "6"
+  }
+]
