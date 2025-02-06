@@ -5,15 +5,15 @@
     <title>Productos en Tiempo Real</title>
     <script src="/socket.io/socket.io.js"></script>
     <script>
-        // Conexión al servidor WebSocket
+        
         const socket = io();
 
-        // Escuchar el evento 'updateProducts' que llega del servidor
+        
         socket.on('updateProducts', function(productos) {
             const listaProductos = document.getElementById('productos-lista');
-            listaProductos.innerHTML = ''; // Limpiar la lista actual
+            listaProductos.innerHTML = ''; 
 
-            // Mostrar cada producto en la lista
+            
             productos.forEach(producto => {
                 const item = document.createElement('li');
                 item.textContent = `${producto.nombre} - $${producto.precio}`;
@@ -21,7 +21,7 @@
             });
         });
 
-        // Función para agregar un nuevo producto
+        
         function agregarProducto() {
             const nombre = document.getElementById('productoNombre').value;
             const precio = parseFloat(document.getElementById('productoPrecio').value);
@@ -39,7 +39,7 @@
     <h1>Productos en Tiempo Real</h1>
 
     <ul id="productos-lista">
-        <!-- Lista de productos se llenará dinámicamente -->
+       
     </ul>
 
     <h2>Agregar un producto</h2>
