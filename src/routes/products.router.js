@@ -1,77 +1,79 @@
-import express from "express"
-import productManager from "../fileManager/productManager.js";
+import express from "express";
+import productModel from "../models/product.model.js";  // Modelo de producto Mongoose
 
-const productsManager = new productManager
+const router = express.Router();
 
-
-  const products = [
-    { id: "1", titulo: 'Producto A', precio: 100 },
-    { id: "2", titulo: 'Producto B', precio: 200 },
-    { id: "3", titulo: 'Producto C', precio: 300 },
-    { id: "4", titulo: 'Producto D', precio: 400 },
-    { id: "5", titulo: 'Producto E', precio: 500 }
-  ];
-
-const router = express.Router()
-
-
+// Obtener todos los productos
 router.get("/", async (req, res) => {
     try {
-        const products = await productsManager.readProducts(); // Usamos el método del manager
+        const products = await productModel.find(); // Usamos Mongoose para obtener todos los productos
         res.json(products);
     } catch (error) {
         res.status(500).json({ error: "Error al leer los productos" });
     }
 });
 
+// Obtener un producto por su id
 router.get("/:pid", async (req, res) => {
     try {
-        const product = await productManager.readProducts();
-        const foundProduct = product.find(p => p.id === req.params.pid);
-        if (!foundProduct) return res.status(404).json({ error: "Producto no encontrado" });
-        res.json(foundProduct);
+        const product = await productModel.findById(req.params.pid); // Buscar por id en MongoDB
+        if (!product) return res.status(404).json({ error: "Producto no encontrado" });
+        res.json(product);
     } catch (error) {
         res.status(500).json({ error: "Error al obtener el producto" });
     }
 });
 
-
+// Crear un nuevo producto
 router.post("/", async (req, res) => {
     try {
-        const product = req.body;
+        const { title, price, stock } = req.body;  // Desestructuración de los campos necesarios
 
-       
-        if (!product.title || !product.price || !product.stock) {
+        if (!title || !price || !stock) {
             return res.status(400).json({ status: "error", message: "Todos los campos son obligatorios (title, price, stock)." });
         }
-        await productsManager.crearProducto(product);
+
+        // Crear un nuevo producto con Mongoose
+        const newProduct = new productModel({
+            title,
+            price,
+            stock
+        });
+
+        // Guardar el producto en la base de datos
+        await newProduct.save();
         res.status(201).json({ status: "success", message: "Producto creado" });
     } catch (error) {
         res.status(500).json({ status: "error", message: "Error al crear el producto", error: error.message });
     }
 });
 
-
+// Actualizar un producto por su id
 router.put("/:id", async (req, res) => {
     try {
         const { id } = req.params;
         const updatedProduct = req.body;
-        await productsManager.updateProduct(id, updatedProduct);
-        res.json({ status: "success", message: "Producto actualizado con éxito" });
+
+        const product = await productModel.findByIdAndUpdate(id, updatedProduct, { new: true }); // Actualiza el producto y devuelve el nuevo
+        if (!product) return res.status(404).json({ status: "error", message: "Producto no encontrado" });
+
+        res.json({ status: "success", message: "Producto actualizado con éxito", product });
     } catch (error) {
         res.status(500).json({ status: "error", message: "Error al actualizar el producto" });
     }
 });
 
+// Eliminar un producto por su id
 router.delete("/:id", async (req, res) => {
     try {
         const { id } = req.params;
-        await productsManager.deleteProduct(id);
+        const product = await productModel.findByIdAndDelete(id);  // Buscar y eliminar por id
+        if (!product) return res.status(404).json({ status: "error", message: "Producto no encontrado" });
+
         res.json({ status: "success", message: "Producto eliminado con éxito" });
     } catch (error) {
         res.status(500).json({ status: "error", message: "Error al eliminar el producto" });
     }
 });
 
-
-export default router
+export default router;

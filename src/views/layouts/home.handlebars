@@ -5,14 +5,46 @@
     <title>Lista de Productos</title>
 </head>
 <body>
-    <h1>Lista de Productos</h1>
-    
+      <h1>Lista de Productos</h1>
+
+    <form method="GET" action="/">
+        <input type="text" name="query" placeholder="Buscar por nombre" value="{{query}}">
+        <select name="category">
+            <option value="">Categoría</option>
+            <option value="Electronics" {{#ifEquals category "Electronics"}}selected{{/ifEquals}}>Electrónica</option>
+            <option value="Clothing" {{#ifEquals category "Clothing"}}selected{{/ifEquals}}>Ropa</option>
+            <option value="Home" {{#ifEquals category "Home"}}selected{{/ifEquals}}>Hogar</option>
+            <!-- Agrega más categorías según sea necesario -->
+        </select>
+        <select name="availability">
+            <option value="">Disponibilidad</option>
+            <option value="true" {{#ifEquals availability "true"}}selected{{/ifEquals}}>Disponible</option>
+            <option value="false" {{#ifEquals availability "false"}}selected{{/ifEquals}}>No disponible</option>
+        </select>
+        <select name="sort">
+            <option value="">Ordenar por precio</option>
+            <option value="asc" {{#ifEquals sort "asc"}}selected{{/ifEquals}}>Ascendente</option>
+            <option value="desc" {{#ifEquals sort "desc"}}selected{{/ifEquals}}>Descendente</option>
+        </select>
+        <button type="submit">Buscar</button>
+    </form>
+
     {{#if productos.length}}
         <ul>
             {{#each productos}}
-                <li>{{nombre}} - ${{precio}}</li>
+                <li>{{title}} - ${{price}} - {{stock}} disponibles</li>
             {{/each}}
         </ul>
+
+        {{#if hasPrevPage}}
+            <a href="{{prevLink}}">Anterior</a>
+        {{/if}}
+        
+        <span>Página {{page}} de {{totalPages}}</span>
+        
+        {{#if hasNextPage}}
+            <a href="{{nextLink}}">Siguiente</a>
+        {{/if}}
     {{else}}
         <p>No hay productos disponibles.</p>
     {{/if}}
