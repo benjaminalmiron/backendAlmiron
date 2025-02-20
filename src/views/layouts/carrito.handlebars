@@ -1,0 +1,34 @@
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carrito de Compras</title>
+</head>
+<body>
+    <h1>Mi Carrito</h1>
+
+    {{#if cartItems.length}}
+    <ul>
+      {{#each cartItems}}
+    <div>
+        <h2>{{this.productName}}</h2>
+        <p>Precio: ${{this.productPrice}}</p>
+        <p>Cantidad: {{this.quantity}}</p>
+        <p>Total por producto: ${{this.totalPrice}}</p>
+         <form action="/carrito/{{../cartId}}/products/{{this.productId}}" method="POST" onsubmit="return confirm('¿Estás seguro de eliminar este producto?');">
+            <input type="hidden" name="_method" value="DELETE" />
+            <button type="submit">Eliminar del carrito</button>
+        </form>
+    </div>
+{{/each}}
+    </ul>
+
+    <h3>Total del Carrito: ${{total}}</h3>
+    {{else}}
+    <p>Tu carrito está vacío.</p>
+    {{/if}}
+
+    <a href="/">Volver a la lista de productos</a>
+</body>
+</html>
+

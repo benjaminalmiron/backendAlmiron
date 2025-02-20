@@ -5,7 +5,7 @@
     <title>Lista de Productos</title>
 </head>
 <body>
-      <h1>Lista de Productos</h1>
+    <h1>Lista de Productos</h1>
 
     <form method="GET" action="/">
         <input type="text" name="query" placeholder="Buscar por nombre" value="{{query}}">
@@ -14,7 +14,6 @@
             <option value="Electronics" {{#ifEquals category "Electronics"}}selected{{/ifEquals}}>Electrónica</option>
             <option value="Clothing" {{#ifEquals category "Clothing"}}selected{{/ifEquals}}>Ropa</option>
             <option value="Home" {{#ifEquals category "Home"}}selected{{/ifEquals}}>Hogar</option>
-            <!-- Agrega más categorías según sea necesario -->
         </select>
         <select name="availability">
             <option value="">Disponibilidad</option>
@@ -31,10 +30,12 @@
 
     {{#if productos.length}}
         <ul>
-            {{#each productos}}
-                <li>{{title}} - ${{price}} - {{stock}} disponibles</li>
-            {{/each}}
-        </ul>
+    {{#each productos}}
+        <li>
+            <a href="/producto/{{_id}}">{{title}}</a> - ${{price}} - {{stock}} disponibles
+        </li>
+    {{/each}}
+    </ul>
 
         {{#if hasPrevPage}}
             <a href="{{prevLink}}">Anterior</a>

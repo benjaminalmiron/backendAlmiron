@@ -1,0 +1,28 @@
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{producto.title}} - Detalles</title>
+</head>
+<body>
+    <h1>{{producto.title}}</h1>
+
+    <p><strong>Descripción:</strong> {{producto.description}}</p>
+    <p><strong>Precio:</strong> ${{producto.price}}</p>
+    <p><strong>Categoría:</strong> {{producto.category}}</p>
+    <p><strong>Disponibilidad:</strong> {{#if producto.stock}}Disponible{{else}}No disponible{{/if}}</p>
+
+  {{#if cartId}}
+  <form method="POST" action="/api/carts/{{cartId}}/products">
+      <input type="hidden" name="producto_id" value="{{producto._id}}">
+      <input type="number" name="quantity" min="1" value="1">
+      <button type="submit">Agregar al Carrito</button>
+  </form>
+{{else}}
+  <p>¡El carrito aún no ha sido creado!</p>
+{{/if}}
+
+
+    <a href="/">Volver a la lista de productos</a>
+</body>
+</html>

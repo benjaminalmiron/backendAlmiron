@@ -1,19 +1,22 @@
-import express from "express"
-import cartsRouter from "./routes/carts.router.js"
-import productsRouter from "./routes/products.router.js"
-import __dirname from "./utils.js"
-import { engine } from "express-handlebars"
-import { Server } from "socket.io"
+import express from "express";
+import cartsRouter from "./routes/carts.router.js";
+import productsRouter from "./routes/products.router.js";
+import __dirname from "./utils.js";
+import { engine } from "express-handlebars";
+import { Server } from "socket.io";
 import http from 'http';
-import mongoose from "mongoose"
-import dotenv from "dotenv"
-import productModel from "./models/product.model.js"
+import mongoose from "mongoose";
+import dotenv from "dotenv";
+import productModel from "./models/product.model.js";
+import Cart from './models/cart.model.js';
+import methodOverride from "method-override";
 
-const app = express()
+const app = express();
 const server = http.createServer(app);
 const io = new Server(server);
-app.use(express.json())
-app.use(express.urlencoded({ extended: true }))
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(methodOverride('_method'));
 
 app.engine('handlebars', engine({
     helpers: {
@@ -52,64 +55,54 @@ app.set('view engine', 'handlebars');
 app.use(express.static(__dirname + '/public'));
 
 server.listen(8080, () => {
-    console.log("El servidor se encuentra escuchando")
+    console.log("El servidor se encuentra escuchando");
 });
 
 app.use("/api/carts", cartsRouter);
 app.use("/api/products", productsRouter);
 
+// Middleware para depurar el método de la solicitud
+app.use((req, res, next) => {
+    console.log('Método de la solicitud:', req.method); // Esto imprimirá el método de la solicitud (POST, DELETE, etc.)
+    next();
+});
+
 app.get('/', async (req, res) => {
-    const limit = parseInt(req.query.limit) || 10; // Número de productos por página
-    const page = parseInt(req.query.page) || 1; // Página actual
-    const query = req.query.query || ''; // Filtro por nombre
-    const category = req.query.category || ''; // Filtro por categoría
-    const availability = req.query.availability || ''; // Filtro por disponibilidad
-    const sort = req.query.sort || ''; // Orden (asc/desc)
+    const limit = parseInt(req.query.limit) || 10;
+    const page = parseInt(req.query.page) || 1;
+    const query = req.query.query || '';
+    const category = req.query.category || '';
+    const availability = req.query.availability || '';
+    const sort = req.query.sort || '';
 
-    // Crear un objeto de filtro
     let filter = {};
-
-    // Filtro por nombre del producto si se proporciona un query
     if (query) {
-        filter.title = { $regex: query, $options: 'i' }; // Buscar de manera insensible a mayúsculas/minúsculas
+        filter.title = { $regex: query, $options: 'i' };
     }
-
-    // Filtro por categoría si se proporciona
     if (category) {
         filter.category = category;
     }
-
-    // Filtro por disponibilidad si se proporciona
     if (availability !== '') {
-        filter.availability = availability === 'true'; // Convertir a booleano
+        filter.availability = availability === 'true';
     }
 
-    // Ordenar productos por precio (ascendente o descendente)
     let sortObj = {};
     if (sort === 'asc') {
-        sortObj.price = 1; // Ascendente
+        sortObj.price = 1;
     } else if (sort === 'desc') {
-        sortObj.price = -1; // Descendente
+        sortObj.price = -1;
     }
 
     try {
-        // Verificar los filtros antes de consultar la base de datos
-        console.log('Filtros:', filter);
-        console.log('Ordenar por:', sortObj);
-
-        // Obtener productos con los filtros aplicados y la paginación usando .lean()
         const products = await productModel.find(filter)
             .sort(sortObj)
             .skip((page - 1) * limit)
             .limit(limit)
-            .lean(); // Usar .lean() para obtener objetos planos
+            .lean();
 
-        const totalProducts = await productModel.countDocuments(filter); // Total de productos para la paginación
-
-        // Calcular el total de páginas para la paginación
+        const totalProducts = await productModel.countDocuments(filter);
         const totalPages = Math.ceil(totalProducts / limit);
 
-        // Renderizar la vista con los productos filtrados
         res.render('layouts/home', {
             productos: products,
             totalPages: totalPages,
@@ -130,22 +123,59 @@ app.get('/', async (req, res) => {
     }
 });
 
-app.get('/realtimeproducts', (req, res) => {
-    res.render('layouts/realTimeProducts', { productos });
+app.get('/producto/:id', async (req, res) => {
+    const productId = req.params.id;
+
+    try {
+        const producto = await productModel.findById(productId).lean();
+
+        if (!producto) {
+            return res.status(404).send('Producto no encontrado');
+        }
+
+        let cart = await Cart.findOne({});
+
+        if (!cart) {
+            cart = new Cart({ products: [] });
+            await cart.save();
+        }
+
+        res.render('productDetail', {
+            producto: producto,
+            cartId: cart._id.toString()
+        });
+
+    } catch (error) {
+        console.error('Error al obtener el producto:', error);
+        res.status(500).send('Error al obtener el producto');
+    }
 });
 
-io.on('connection', (socket) => {
-    console.log('Un cliente se ha conectado');
+app.get('/carrito/:cid', async (req, res) => {
+    const { cid } = req.params;
 
-    socket.emit('updateProducts', productos);
+    try {
+        const cart = await Cart.findById(cid).populate('products.product');
 
-    socket.on('addProduct', (nuevoProducto) => {
-        productos.push(nuevoProducto);
+        if (!cart) {
+            return res.status(404).send('Carrito no encontrado');
+        }
 
-        io.sockets.emit('updateProducts', productos);
-    });
+        const cartItems = cart.products.map(item => ({
+            productName: item.product.title,
+            productPrice: item.product.price,
+            quantity: item.quantity,
+            totalPrice: item.product.price * item.quantity,
+            productId: item.product._id.toString()
+        }));
 
-    socket.on('disconnect', () => {
-        console.log('Un cliente se ha desconectado');
-    });
+        res.render('layouts/carrito', {
+            cartItems,
+            total: cartItems.reduce((sum, item) => sum + item.totalPrice, 0),
+            cartId: cid
+        });
+    } catch (error) {
+        console.error('Error al obtener el carrito:', error);
+        res.status(500).send('Error al obtener el carrito');
+    }
 });
