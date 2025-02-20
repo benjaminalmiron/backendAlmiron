@@ -9,14 +9,17 @@ import mongoose from "mongoose";
 import dotenv from "dotenv";
 import productModel from "./models/product.model.js";
 import Cart from './models/cart.model.js';
-import methodOverride from "method-override";
+import methodOverride from "method-override"
+
+
 
 const app = express();
+app.use(methodOverride('_method'));
 const server = http.createServer(app);
 const io = new Server(server);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(methodOverride('_method'));
+
 
 app.engine('handlebars', engine({
     helpers: {
@@ -150,13 +153,14 @@ app.get('/producto/:id', async (req, res) => {
         res.status(500).send('Error al obtener el producto');
     }
 });
-
+// Ruta para obtener el carrito
+// Ruta para obtener el carrito
 app.get('/carrito/:cid', async (req, res) => {
     const { cid } = req.params;
 
     try {
         const cart = await Cart.findById(cid).populate('products.product');
-
+        
         if (!cart) {
             return res.status(404).send('Carrito no encontrado');
         }
@@ -166,16 +170,22 @@ app.get('/carrito/:cid', async (req, res) => {
             productPrice: item.product.price,
             quantity: item.quantity,
             totalPrice: item.product.price * item.quantity,
-            productId: item.product._id.toString()
+            productId: item.product._id.toString()  // Asegúrate de pasar el productId correctamente
         }));
 
+        // Asegúrate de pasar el cartId correctamente
         res.render('layouts/carrito', {
             cartItems,
             total: cartItems.reduce((sum, item) => sum + item.totalPrice, 0),
-            cartId: cid
+            cartId: cid  // Pasar el cartId al frontend
         });
     } catch (error) {
         console.error('Error al obtener el carrito:', error);
         res.status(500).send('Error al obtener el carrito');
     }
 });
+
+
+
+
+

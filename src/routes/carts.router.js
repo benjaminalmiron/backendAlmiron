@@ -52,30 +52,49 @@ router.post('/:cid/products', async (req, res) => {
 
 
 // Eliminar un producto específico del carrito
-router.delete('/api/carts/:cid/products/:pid', async (req, res) => {
-    const { cid, pid } = req.params;
-   
+// Ruta para eliminar un producto de un carrito
+// Eliminar un producto específico del carrito
+// Eliminar un producto específico del carrito
+// Eliminar un producto del carrito sin necesidad de pasar cartId
+router.delete('/products/:productId', async (req, res) => {
+    const { productId } = req.params;  // Recibimos solo el productId desde la URL
+
     try {
-        const cart = await Cart.findById(cid);
+        // Buscar el carrito que contiene el producto
+        const cart = await Cart.findOne({ 'products.product': productId });
+
         if (!cart) {
-            return res.status(404).send('Carrito no encontrado');
+            return res.status(404).send('Carrito no encontrado o el producto no está en el carrito');
         }
 
-        const productIndex = cart.products.findIndex(p => p.product.toString() === pid);
+        // Encuentra el índice del producto en el carrito
+        const productIndex = cart.products.findIndex(p => p.product.toString() === productId);
+
         if (productIndex === -1) {
             return res.status(404).send('Producto no encontrado en el carrito');
         }
 
         // Eliminar el producto
         cart.products.splice(productIndex, 1);
+
+        // Guardar los cambios
         await cart.save();
 
-        res.status(200).send(cart);  // Responder con el carrito actualizado
+        res.status(200).send('Producto eliminado del carrito');
     } catch (error) {
         console.error('Error al eliminar el producto:', error);
-        res.status(500).send('Error al eliminar el producto del carrito');
+        res.status(500).send('Error al eliminar el producto');
     }
 });
+
+
+
+
+
+
+
+
+
 
 
 // Actualizar el carrito con un arreglo de productos (PUT)
