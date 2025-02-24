@@ -64,9 +64,9 @@ server.listen(8080, () => {
 app.use("/api/carts", cartsRouter);
 app.use("/api/products", productsRouter);
 
-// Middleware para depurar el método de la solicitud
+
 app.use((req, res, next) => {
-    console.log('Método de la solicitud:', req.method); // Esto imprimirá el método de la solicitud (POST, DELETE, etc.)
+    console.log('Método de la solicitud:', req.method); 
     next();
 });
 
@@ -153,8 +153,7 @@ app.get('/producto/:id', async (req, res) => {
         res.status(500).send('Error al obtener el producto');
     }
 });
-// Ruta para obtener el carrito
-// Ruta para obtener el carrito
+
 app.get('/carrito/:cid', async (req, res) => {
     const { cid } = req.params;
 
@@ -170,14 +169,14 @@ app.get('/carrito/:cid', async (req, res) => {
             productPrice: item.product.price,
             quantity: item.quantity,
             totalPrice: item.product.price * item.quantity,
-            productId: item.product._id.toString()  // Asegúrate de pasar el productId correctamente
+            productId: item.product._id.toString()  
         }));
 
-        // Asegúrate de pasar el cartId correctamente
+        
         res.render('layouts/carrito', {
             cartItems,
             total: cartItems.reduce((sum, item) => sum + item.totalPrice, 0),
-            cartId: cid  // Pasar el cartId al frontend
+            cartId: cid  
         });
     } catch (error) {
         console.error('Error al obtener el carrito:', error);

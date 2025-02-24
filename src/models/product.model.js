@@ -14,11 +14,11 @@ const productSchema = new mongoose.Schema({
         required: true
     },
     category: {
-        type: String, // Se asume que la categoría es un string, pero puede ser más complejo si necesitas un modelo separado para categorías
+        type: String, 
         required: true
     },
     availability: {
-        type: Boolean, // True si el producto está disponible, false si no lo está
+        type: Boolean, 
         required: true
     }
 });

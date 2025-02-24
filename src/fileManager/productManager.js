@@ -10,23 +10,23 @@ class productManager {
         try {
             let products = await this.readProducts();
     
-            // Filtrar solo los IDs numéricos para asegurar que no se incluyan valores no válidos
+           
             const numericIds = products
                 .map(p => parseInt(p.id))
-                .filter(id => !isNaN(id)); // Solo IDs válidos numéricos
+                .filter(id => !isNaN(id)); 
     
-            // Encontrar el ID máximo entre los IDs válidos y sumarle 1
+            
             const maxId = numericIds.length > 0 
                 ? Math.max(...numericIds) + 1 
-                : 1; // Si no hay productos numéricos, el primer ID será 1
+                : 1;
     
-            // Asignamos el nuevo ID al producto
-            const newProduct = { ...product, id: maxId.toString() }; // Convertir el ID a string para consistencia
+           
+            const newProduct = { ...product, id: maxId.toString() }; 
     
-            // Agregar el producto al arreglo de productos
+           
             products.push(newProduct);
     
-            // Escribir los productos actualizados en el archivo
+            
             await fs.writeFile(this.filePath, JSON.stringify(products, null, 2));
     
             console.log("Producto creado con éxito:", newProduct);

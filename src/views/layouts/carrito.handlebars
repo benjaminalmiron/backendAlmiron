@@ -16,7 +16,7 @@
         <p>Cantidad: {{this.quantity}}</p>
         <p>Total por producto: ${{this.totalPrice}}</p>
 
-        <!-- Botón para eliminar el producto -->
+        
         <button type="button" onclick="eliminarProducto('{{this.productId}}')">Eliminar del carrito</button>
     </div>
     {{/each}}
@@ -30,29 +30,29 @@
     <a href="/">Volver a la lista de productos</a>
 
     <script>
-        // Función para eliminar el producto usando 'fetch'
+        
         function eliminarProducto(productId) {
-            // Depuración: Verifica los valores que se están pasando
-            console.log("Product ID:", productId);  // Verifica que productId esté correctamente asignado
+           
+            console.log("Product ID:", productId);  
 
-            // Confirma con el usuario si está seguro de eliminar el producto
+            
             if (confirm('¿Estás seguro de eliminar este producto?')) {
-                // Realiza la solicitud DELETE usando fetch
+                
                 fetch(`/api/carts/products/${productId}`, {
                     method: 'DELETE',
                 })
                 .then(response => {
-                    // Si la respuesta es exitosa (status 200)
+                    
                     if (response.ok) {
                         alert('Producto eliminado del carrito');
-                        // Recargar la página para actualizar el carrito
+                        
                         window.location.reload();
                     } else {
                         alert('Hubo un problema al eliminar el producto');
                     }
                 })
                 .catch(error => {
-                    // Maneja cualquier error que pueda ocurrir
+                    
                     console.error('Error al eliminar el producto:', error);
                     alert('Error al eliminar el producto');
                 });
